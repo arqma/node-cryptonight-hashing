@@ -5,7 +5,9 @@
  * Copyright 2014-2016 Wolf9466    <https://github.com/OhGodAPet>
  * Copyright 2016      Jay D Dee   <jayddee246@gmail.com>
  * Copyright 2017-2018 XMR-Stak    <https://github.com/fireice-uk>, <https://github.com/psychocrypt>
+ * Copyright 2018      Lee Clagett <https://github.com/vtnerd>
  * Copyright 2018-2019 SChernykh   <https://github.com/SChernykh>
+ * Copyright 2018-2019 tevador     <tevador@gmail.com>
  * Copyright 2016-2019 XMRig       <https://github.com/xmrig>, <support@xmrig.com>
  *
  *   This program is free software: you can redistribute it and/or modify
@@ -22,54 +24,30 @@
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef XMRIG_ASSEMBLY_H
-#define XMRIG_ASSEMBLY_H
+#ifndef XMRIG_IMEMORYPOOL_H
+#define XMRIG_IMEMORYPOOL_H
 
 
-#include "rapidjson/fwd.h"
+#include <cstddef>
+#include <cstdint>
 
 
 namespace xmrig {
 
 
-class Assembly
+class IMemoryPool
 {
 public:
-    enum Id : int {
-        NONE,
-        AUTO,
-        INTEL,
-        RYZEN,
-        BULLDOZER,
-        MAX
-    };
+    virtual ~IMemoryPool() = default;
 
-
-    inline Assembly()                                                   {}
-    inline Assembly(Id id) : m_id(id)                                   {}
-    inline Assembly(const char *assembly) : m_id(parse(assembly))       {}
-    inline Assembly(const rapidjson::Value &value) : m_id(parse(value)) {}
-
-    static Id parse(const char *assembly, Id defaultValue = AUTO);
-    static Id parse(const rapidjson::Value &value, Id defaultValue = AUTO);
-
-    const char *toString() const;
-    rapidjson::Value toJSON() const;
-
-    inline bool isEqual(const Assembly &other) const      { return m_id == other.m_id; }
-
-    inline bool operator!=(Assembly::Id id) const         { return m_id != id; }
-    inline bool operator!=(const Assembly &other) const   { return !isEqual(other); }
-    inline bool operator==(Assembly::Id id) const         { return m_id == id; }
-    inline bool operator==(const Assembly &other) const   { return isEqual(other); }
-    inline operator Assembly::Id() const                  { return m_id; }
-
-private:
-    Id m_id = AUTO;
+    virtual bool isHugePages(uint32_t node) const       = 0;
+    virtual uint8_t *get(size_t size, uint32_t node)    = 0;
+    virtual void release(uint32_t node)                 = 0;
 };
 
 
 } /* namespace xmrig */
 
 
-#endif /* XMRIG_ASSEMBLY_H */
+
+#endif /* XMRIG_IMEMORYPOOL_H */
